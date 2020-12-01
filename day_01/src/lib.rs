@@ -1,6 +1,6 @@
 use std::fs;
 
-fn get_expenses(filename: &str) -> Vec<u32> {
+pub fn get_expenses(filename: &str) -> Vec<u32> {
     let text = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
     let mut expenses: Vec<u32> = Vec::new();
@@ -10,7 +10,7 @@ fn get_expenses(filename: &str) -> Vec<u32> {
     expenses
 }
 
-fn find_pair_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32) {
+pub fn find_pair_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32) {
     for i in 0..values.len() {
         for j in i+1..values.len() {
             if values[i] + values[j] == sum {
@@ -21,7 +21,7 @@ fn find_pair_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32) {
     panic!("Didn't find the sum");
 }
 
-fn product_of_pair(values: (u32, u32)) -> u32 {
+pub fn product_of_pair(values: (u32, u32)) -> u32 {
     values.0 * values.1
 }
 
