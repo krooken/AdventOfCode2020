@@ -25,6 +25,23 @@ pub fn product_of_pair(values: (u32, u32)) -> u32 {
     values.0 * values.1
 }
 
+pub fn find_triple_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32, u32) {
+    for i in 0..values.len() {
+        for j in i+1..values.len() {
+            for k in j+1..values.len() {
+                if values[i] + values[j] + values[k] == sum {
+                    return (values[i], values[j], values[k]);
+                }
+            }
+        }
+    }
+    panic!("Didn't find the sum");
+}
+
+pub fn product_of_triple(values: (u32, u32, u32)) -> u32 {
+    values.0 * values.1 * values.2
+}
+
 
 #[cfg(test)]
 mod tests {
