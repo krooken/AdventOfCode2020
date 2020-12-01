@@ -21,10 +21,14 @@ fn find_pair_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32) {
     panic!("Didn't find the sum");
 }
 
+fn product_of_pair(values: (u32, u32)) -> u32 {
+    values.0 * values.1
+}
+
 
 #[cfg(test)]
 mod tests {
-    use crate::{get_expenses, find_pair_with_sum};
+    use crate::{get_expenses, find_pair_with_sum, product_of_pair};
 
     #[test]
     fn first_element() {
@@ -46,5 +50,20 @@ mod tests {
     #[test]
     fn ten_elements() {
         assert_eq!((7,3), find_pair_with_sum(10, &vec![1, 7, 4, 2, 5, 11, 44, 1, 3, 0]));
+    }
+
+    #[test]
+    fn product_1() {
+        assert_eq!(0, product_of_pair((0, 2)));
+    }
+
+    #[test]
+    fn product_2() {
+        assert_eq!(2, product_of_pair((1, 2)));
+    }
+
+    #[test]
+    fn product_3() {
+        assert_eq!(96, product_of_pair((12, 8)));
     }
 }
