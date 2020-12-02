@@ -1,4 +1,5 @@
 use regex;
+use std::fs;
 
 struct Entry {
     bounds: (u32, u32),
@@ -26,9 +27,17 @@ fn get_entry_from_text(text: &str) -> Entry {
     Entry::new(bounds, cap[3].to_string(), cap[4].to_string())
 }
 
+fn get_entries_from_text(filename: &str) -> Vec<Entry> {
+    let mut entries = Vec::new();
+    for line in fs::read_to_string(filename).unwrap().lines() {
+        entries.push(get_entry_from_text(line));
+    }
+    entries
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::get_entry_from_text;
+    use crate::{get_entry_from_text, get_entries_from_text};
 
     #[test]
     fn one_entry() {
@@ -37,5 +46,13 @@ mod tests {
         assert_eq!(entry.bounds, (1, 3));
         assert_eq!(entry.character, String::from("a"));
         assert_eq!(entry.password, String::from("abc"));
+    }
+
+    #[test]
+    fn task_example_from_file() {
+        let entry = &get_entries_from_text("data/example.txt")[1];
+        assert_eq!(entry.bounds, (1, 3));
+        assert_eq!(entry.character, String::from("b"));
+        assert_eq!(entry.password, String::from("cdefg"));
     }
 }
