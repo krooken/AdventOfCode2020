@@ -38,7 +38,7 @@ fn get_entries_from_text(filename: &str) -> Vec<Entry> {
 fn check_valid(entry: Entry) -> bool {
     let re = regex::Regex::new(&format!("[{}]", entry.character)).unwrap();
     let mut sum = 0;
-    for cap in re.captures_iter(&entry.password) {
+    for _cap in re.captures_iter(&entry.password) {
         sum += 1;
     }
     entry.bounds.0 <= sum && sum <= entry.bounds.1
@@ -55,9 +55,24 @@ pub fn count_valid_entries(filename: &str) -> u32 {
     nr_valid
 }
 
+fn check_new_valid(entry: Entry) -> bool {
+    let i = (entry.bounds.0 - 1) as usize;
+    let j = (entry.bounds.1 - 1) as usize;
+    let password = entry.password;
+    let first_match = password[i..i+1] == entry.character;
+    let second_match = password[j..j+1] == entry.character;
+    (first_match || second_match) && !(first_match && second_match)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_entry_from_text, get_entries_from_text, check_valid, Entry, count_valid_entries};
+    use crate::{
+        get_entry_from_text,
+        get_entries_from_text,
+        check_valid,
+        Entry,
+        count_valid_entries,
+        check_new_valid};
 
     #[test]
     fn one_entry() {
@@ -97,5 +112,25 @@ mod tests {
     #[test]
     fn nr_invalid() {
         assert_eq!(2, count_valid_entries("data/example.txt"));
+    }
+
+    #[test]
+    fn new_valid_entry() {
+        let entry = Entry::new(
+            (1, 3),
+            "a".to_string(),
+            "abcde".to_string()
+        );
+        assert!(check_new_valid(entry));
+    }
+
+    #[test]
+    fn new_invalid_entry() {
+        let entry = Entry::new(
+            (1, 3),
+            "b".to_string(),
+            "cdefg".to_string()
+        );
+        assert!(!check_new_valid(entry));
     }
 }
