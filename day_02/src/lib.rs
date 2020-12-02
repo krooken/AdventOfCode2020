@@ -45,10 +45,15 @@ fn check_valid(entry: Entry) -> bool {
 }
 
 pub fn count_valid_entries(filename: &str) -> u32 {
+    count_valid(filename, |e|{check_valid(e)})
+}
+
+fn count_valid<F>(filename: &str, f: F) -> u32
+    where F: Fn(Entry) -> bool {
     let entries = get_entries_from_text(filename);
     let mut nr_valid = 0;
     for entry in entries {
-        if check_valid(entry) {
+        if f(entry) {
             nr_valid += 1;
         }
     }
