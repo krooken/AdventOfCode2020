@@ -48,6 +48,10 @@ pub fn count_valid_entries(filename: &str) -> u32 {
     count_valid(filename, |e|{check_valid(e)})
 }
 
+pub fn count_new_valid_entries(filename: &str) -> u32 {
+    count_valid(filename, |e|{check_new_valid(e)})
+}
+
 fn count_valid<F>(filename: &str, f: F) -> u32
     where F: Fn(Entry) -> bool {
     let entries = get_entries_from_text(filename);
@@ -71,13 +75,7 @@ fn check_new_valid(entry: Entry) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        get_entry_from_text,
-        get_entries_from_text,
-        check_valid,
-        Entry,
-        count_valid_entries,
-        check_new_valid};
+    use crate::{get_entry_from_text, get_entries_from_text, check_valid, Entry, count_valid_entries, check_new_valid, count_new_valid_entries};
 
     #[test]
     fn one_entry() {
@@ -115,7 +113,7 @@ mod tests {
     }
 
     #[test]
-    fn nr_invalid() {
+    fn nr_valid() {
         assert_eq!(2, count_valid_entries("data/example.txt"));
     }
 
@@ -137,5 +135,10 @@ mod tests {
             "cdefg".to_string()
         );
         assert!(!check_new_valid(entry));
+    }
+
+    #[test]
+    fn nr_new_valid() {
+        assert_eq!(1, count_new_valid_entries("data/example.txt"));
     }
 }
