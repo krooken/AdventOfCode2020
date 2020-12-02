@@ -35,9 +35,18 @@ fn get_entries_from_text(filename: &str) -> Vec<Entry> {
     entries
 }
 
+fn check_valid(entry: Entry) -> bool {
+    let re = regex::Regex::new(&format!("[{}]", entry.character)).unwrap();
+    let mut sum = 0;
+    for cap in re.captures_iter(&entry.password) {
+        sum += 1;
+    }
+    entry.bounds.0 <= sum && sum <= entry.bounds.1
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_entry_from_text, get_entries_from_text};
+    use crate::{get_entry_from_text, get_entries_from_text, check_valid, Entry};
 
     #[test]
     fn one_entry() {
@@ -54,5 +63,23 @@ mod tests {
         assert_eq!(entry.bounds, (1, 3));
         assert_eq!(entry.character, String::from("b"));
         assert_eq!(entry.password, String::from("cdefg"));
+    }
+
+    #[test]
+    fn valid_entry() {
+        let entry = Entry::new(
+            (1, 3),
+            "a".to_string(),
+            "abcde".to_string());
+        assert!(check_valid(entry));
+    }
+
+    #[test]
+    fn invalid_entry() {
+        let entry = Entry::new(
+            (1, 3),
+            "b".to_string(),
+            "cdfg".to_string());
+        assert!(!check_valid(entry));
     }
 }
