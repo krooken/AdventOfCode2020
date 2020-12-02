@@ -44,9 +44,20 @@ fn check_valid(entry: Entry) -> bool {
     entry.bounds.0 <= sum && sum <= entry.bounds.1
 }
 
+pub fn count_valid_entries(filename: &str) -> u32 {
+    let entries = get_entries_from_text(filename);
+    let mut nr_valid = 0;
+    for entry in entries {
+        if check_valid(entry) {
+            nr_valid += 1;
+        }
+    }
+    nr_valid
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_entry_from_text, get_entries_from_text, check_valid, Entry};
+    use crate::{get_entry_from_text, get_entries_from_text, check_valid, Entry, count_valid_entries};
 
     #[test]
     fn one_entry() {
@@ -81,5 +92,10 @@ mod tests {
             "b".to_string(),
             "cdfg".to_string());
         assert!(!check_valid(entry));
+    }
+
+    #[test]
+    fn nr_invalid() {
+        assert_eq!(2, count_valid_entries("data/example.txt"));
     }
 }
