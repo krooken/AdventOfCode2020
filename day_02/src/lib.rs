@@ -33,7 +33,7 @@ fn get_entries_from_text(filename: &str) -> Vec<Entry> {
         .collect()
 }
 
-fn check_valid(entry: Entry) -> bool {
+fn check_valid(entry: &Entry) -> bool {
     let re = regex::Regex::new(&format!("[{}]", entry.character)).unwrap();
     let sum = re.captures_iter(&entry.password).fold(0, |acc, _| acc + 1);
     entry.bounds.0 <= sum && sum <= entry.bounds.1
@@ -48,21 +48,15 @@ pub fn count_new_valid_entries(filename: &str) -> u32 {
 }
 
 fn count_valid<F>(filename: &str, f: F) -> u32
-    where F: Fn(Entry) -> bool {
+    where F: Fn(&Entry) -> bool {
     let entries = get_entries_from_text(filename);
-    let mut nr_valid = 0;
-    for entry in entries {
-        if f(entry) {
-            nr_valid += 1;
-        }
-    }
-    nr_valid
+    entries.iter().filter(|entry| f(entry)).fold(0, |acc, _| acc + 1)
 }
 
-fn check_new_valid(entry: Entry) -> bool {
+fn check_new_valid(entry: &Entry) -> bool {
     let i = (entry.bounds.0 - 1) as usize;
     let j = (entry.bounds.1 - 1) as usize;
-    let password = entry.password;
+    let password = &entry.password;
     let first_match = password[i..i+1] == entry.character;
     let second_match = password[j..j+1] == entry.character;
     (first_match || second_match) && !(first_match && second_match)
@@ -95,7 +89,7 @@ mod tests {
             (1, 3),
             "a".to_string(),
             "abcde".to_string());
-        assert!(check_valid(entry));
+        assert!(check_valid(&entry));
     }
 
     #[test]
@@ -104,7 +98,7 @@ mod tests {
             (1, 3),
             "b".to_string(),
             "cdfg".to_string());
-        assert!(!check_valid(entry));
+        assert!(!check_valid(&entry));
     }
 
     #[test]
@@ -119,7 +113,7 @@ mod tests {
             "a".to_string(),
             "abcde".to_string()
         );
-        assert!(check_new_valid(entry));
+        assert!(check_new_valid(&entry));
     }
 
     #[test]
@@ -129,7 +123,7 @@ mod tests {
             "b".to_string(),
             "cdefg".to_string()
         );
-        assert!(!check_new_valid(entry));
+        assert!(!check_new_valid(&entry));
     }
 
     #[test]
