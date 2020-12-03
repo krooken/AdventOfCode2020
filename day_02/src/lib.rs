@@ -141,4 +141,14 @@ mod tests {
     fn nr_new_valid() {
         assert_eq!(1, count_new_valid_entries("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(572, count_valid_entries("data/passwords.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(306, count_new_valid_entries("data/passwords.txt"));
+    }
 }
