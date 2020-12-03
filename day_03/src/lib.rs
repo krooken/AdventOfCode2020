@@ -18,9 +18,19 @@ fn count_trees_for_slope(forest: &str, rows: usize, columns: usize) -> u32 {
     count
 }
 
+pub fn multiply_trees(filename: &str) -> u32 {
+    let forest = fs::read_to_string(filename).unwrap();
+    let slopes = vec![(1, 1), (1, 3), (1, 5), (1, 7), (2, 1)];
+    let mut product = 1;
+    for (row, column) in slopes {
+        product *= count_trees_for_slope(&forest, row, column);
+    }
+    product
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{count_trees, count_trees_for_slope};
+    use crate::{count_trees, count_trees_for_slope, multiply_trees};
     use std::fs;
 
     #[test]
@@ -56,5 +66,10 @@ mod tests {
     fn test_2_and_1() {
         let forest = fs::read_to_string("data/example.txt").unwrap();
         assert_eq!(2, count_trees_for_slope(&forest, 2, 1));
+    }
+
+    #[test]
+    fn test_product() {
+        assert_eq!(336, multiply_trees("data/example.txt"));
     }
 }
