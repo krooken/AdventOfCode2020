@@ -45,7 +45,7 @@ pub fn product_of_triple(values: (u32, u32, u32)) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{get_expenses, find_pair_with_sum, product_of_pair};
+    use crate::{get_expenses, find_pair_with_sum, product_of_pair, find_triple_with_sum, product_of_triple};
 
     #[test]
     fn first_element() {
@@ -82,5 +82,19 @@ mod tests {
     #[test]
     fn product_3() {
         assert_eq!(96, product_of_pair((12, 8)));
+    }
+
+    #[test]
+    fn test_task1() {
+        let values = get_expenses("data/ExpenseReport.txt");
+        let pair = find_pair_with_sum(2020, &values);
+        assert_eq!(793524, product_of_pair(pair));
+    }
+
+    #[test]
+    fn test_task2() {
+        let values = get_expenses("data/ExpenseReport.txt");
+        let triple = find_triple_with_sum(2020, &values);
+        assert_eq!(61515678, product_of_triple(triple));
     }
 }
