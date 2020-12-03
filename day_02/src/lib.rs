@@ -28,11 +28,9 @@ fn get_entry_from_text(text: &str) -> Entry {
 }
 
 fn get_entries_from_text(filename: &str) -> Vec<Entry> {
-    let mut entries = Vec::new();
-    for line in fs::read_to_string(filename).unwrap().lines() {
-        entries.push(get_entry_from_text(line));
-    }
-    entries
+    fs::read_to_string(filename).unwrap().lines()
+        .map(|line| get_entry_from_text(line))
+        .collect()
 }
 
 fn check_valid(entry: Entry) -> bool {
