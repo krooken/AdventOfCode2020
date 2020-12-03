@@ -24,7 +24,10 @@ fn get_entry_from_text(text: &str) -> Entry {
     let re = regex::Regex::new(r"^(\d+)-(\d+) ([[:alpha:]]): ([[:alpha:]]+)$").unwrap();
     let cap = re.captures(text).unwrap();
     let bounds = (cap[1].parse().unwrap(), cap[2].parse().unwrap());
-    Entry::new(bounds, cap[3].to_string(), cap[4].to_string())
+    Entry::new(
+        bounds,
+        cap[3].to_string(),
+        cap[4].to_string())
 }
 
 fn get_entries_from_text(filename: &str) -> Vec<Entry> {
@@ -35,7 +38,8 @@ fn get_entries_from_text(filename: &str) -> Vec<Entry> {
 
 fn check_valid(entry: &Entry) -> bool {
     let re = regex::Regex::new(&format!("[{}]", entry.character)).unwrap();
-    let sum = re.captures_iter(&entry.password).fold(0, |acc, _| acc + 1);
+    let sum = re.captures_iter(&entry.password)
+        .fold(0, |acc, _| acc + 1);
     entry.bounds.0 <= sum && sum <= entry.bounds.1
 }
 
@@ -50,7 +54,9 @@ pub fn count_new_valid_entries(filename: &str) -> u32 {
 fn count_valid<F>(filename: &str, f: F) -> u32
     where F: Fn(&Entry) -> bool {
     let entries = get_entries_from_text(filename);
-    entries.iter().filter(|entry| f(entry)).fold(0, |acc, _| acc + 1)
+    entries.iter()
+        .filter(|entry| f(entry))
+        .fold(0, |acc, _| acc + 1)
 }
 
 fn check_new_valid(entry: &Entry) -> bool {
