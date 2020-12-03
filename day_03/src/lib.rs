@@ -2,10 +2,14 @@ use std::fs;
 
 pub fn count_trees(filename: &str) -> u32 {
     let forest = fs::read_to_string(filename).unwrap();
+    count_trees_for_slope(&forest)
+}
+
+fn count_trees_for_slope(forest: &String) -> u32 {
     let mut column = 0;
     let mut count = 0;
     for line in forest.lines() {
-        let pos = &line[column..column+1];
+        let pos = &line[column..column + 1];
         if pos == "#" {
             count += 1;
         }
