@@ -35,10 +35,7 @@ fn get_entries_from_text(filename: &str) -> Vec<Entry> {
 
 fn check_valid(entry: Entry) -> bool {
     let re = regex::Regex::new(&format!("[{}]", entry.character)).unwrap();
-    let mut sum = 0;
-    for _cap in re.captures_iter(&entry.password) {
-        sum += 1;
-    }
+    let sum = re.captures_iter(&entry.password).fold(0, |acc, _| acc + 1);
     entry.bounds.0 <= sum && sum <= entry.bounds.1
 }
 
