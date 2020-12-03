@@ -3,11 +3,7 @@ use std::fs;
 pub fn get_expenses(filename: &str) -> Vec<u32> {
     let text = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
-    let mut expenses: Vec<u32> = Vec::new();
-    for row in text.lines() {
-        expenses.push(row.parse().expect(&format!("Parsing failed on {}", row)));
-    }
-    expenses
+    text.lines().map(|line| line.parse().unwrap()).collect()
 }
 
 pub fn find_pair_with_sum(sum: u32, values: &Vec<u32>) -> (u32, u32) {
