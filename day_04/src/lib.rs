@@ -1,7 +1,95 @@
+use std::fs;
+use regex;
+
+struct Passport {
+    byr: Option<String>,
+    iyr: Option<String>,
+    eyr: Option<String>,
+    hgt: Option<String>,
+    hcl: Option<String>,
+    ecl: Option<String>,
+    pid: Option<String>,
+    cid: Option<String>,
+}
+
+impl Passport {
+    fn new() -> Passport {
+        Passport {
+            byr: None,
+            iyr: None,
+            eyr: None,
+            hgt: None,
+            hcl: None,
+            ecl: None,
+            pid: None,
+            cid: None,
+        }
+    }
+}
+
+fn parse_passport(text: &str) -> Passport {
+    let mut passport = Passport::new();
+    let re_byr = regex::Regex::new(r"(byr):(\S*)").unwrap();
+    match re_byr.captures(text) {
+        Some(caps) => passport.byr = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_iyr = regex::Regex::new(r"(iyr):(\S*)").unwrap();
+    match re_iyr.captures(text) {
+        Some(caps) => passport.iyr = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_eyr = regex::Regex::new(r"(eyr):(\S*)").unwrap();
+    match re_eyr.captures(text) {
+        Some(caps) => passport.eyr = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_hgt = regex::Regex::new(r"(hgt):(\S*)").unwrap();
+    match re_hgt.captures(text) {
+        Some(caps) => passport.hgt = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_hcl = regex::Regex::new(r"(hcl):(\S*)").unwrap();
+    match re_hcl.captures(text) {
+        Some(caps) => passport.hcl = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_ecl = regex::Regex::new(r"(ecl):(\S*)").unwrap();
+    match re_ecl.captures(text) {
+        Some(caps) => passport.ecl = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_pid = regex::Regex::new(r"(pid):(\S*)").unwrap();
+    match re_pid.captures(text) {
+        Some(caps) => passport.pid = Some(caps[2].to_string()),
+        None => (),
+    }
+    let re_cid = regex::Regex::new(r"(cid):(\S*)").unwrap();
+    match re_cid.captures(text) {
+        Some(caps) => passport.cid = Some(caps[2].to_string()),
+        None => (),
+    }
+    passport
+}
+
+
 #[cfg(test)]
 mod tests {
+    use crate::{parse_passport};
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test_parse_passport() {
+        let text = "eyr:eyr_text";
+        assert_eq!(Some("eyr_text".to_string()), parse_passport(text).eyr);
+        assert_eq!(None, parse_passport(text).cid);
+    }
+
+    #[test]
+    fn test_parse_multi_passport() {
+        let text = "eyr:eyr_text cid:123\n\rbyr:test";
+        assert_eq!(Some("eyr_text".to_string()), parse_passport(text).eyr);
+        assert_eq!(Some("123".to_string()), parse_passport(text).cid);
+        assert_eq!(Some("test".to_string()), parse_passport(text).byr);
+        assert_eq!(None, parse_passport(text).pid);
     }
 }
