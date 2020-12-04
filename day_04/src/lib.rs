@@ -82,10 +82,25 @@ fn check_valid(passport: &Passport) -> bool {
         passport.pid != None
 }
 
+fn parse_passports(text: &str) -> Vec<Passport> {
+    let re = regex::Regex::new(r"^\W*$").unwrap();
+    let mut text_with_delim = String::new();
+    for line in text.lines() {
+        if re.is_match(line) {
+            text_with_delim.push_str(";;");
+        } else {
+            text_with_delim.push_str(&format!("{} ", line));
+        }
+    }
+    let passports = text_with_delim.split(";;").collect::<Vec<&str>>();
+    passports.iter().map(|entry| parse_passport(entry)).collect()
+}
+
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_passport, check_valid};
+    use crate::{parse_passport, check_valid, parse_passports};
+    use std::fs;
 
     #[test]
     fn test_parse_passport() {
@@ -107,5 +122,13 @@ mod tests {
     fn test_valid_passport() {
         let text = "eyr:eyr_text cid:123\n\rbyr:test";
         assert!(!check_valid(&parse_passport(text)));
+    }
+
+    #[test]
+    fn test_parse_passports() {
+        let text = fs::read_to_string("data/example.txt").unwrap();
+        let passports = parse_passports(&text);
+        assert_eq!(Some("gry".to_string()), passports.first().unwrap().ecl);
+        assert_eq!(Some("59in".to_string()), passports.last().unwrap().hgt);
     }
 }
