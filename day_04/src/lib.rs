@@ -270,4 +270,14 @@ mod tests {
     fn test_nr_strict_valid_passports() {
         assert_eq!(2, nr_strict_valid_passports("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(226, nr_valid_passports("data/passports.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(160, nr_strict_valid_passports("data/passports.txt"));
+    }
 }
