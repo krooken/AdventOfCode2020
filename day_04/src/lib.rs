@@ -82,6 +82,106 @@ fn check_valid(passport: &Passport) -> bool {
         passport.pid != None
 }
 
+fn check_stricter_valid(passport: &Passport) -> bool {
+    let mut valid = true;
+    match &passport.byr {
+        Some(year) => {
+            if year.as_bytes().len() != 4 {
+                valid = false;
+            } else {
+                match year.parse() {
+                    Ok(n) => if 1920 > n || n > 2002 {valid = false},
+                    Err(_) => valid = false,
+                }
+            }
+        },
+        None => valid = false,
+    }
+    match &passport.ecl {
+        Some(color) => {
+            let re = regex::Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").unwrap();
+            if !re.is_match(&color) {
+                valid = false;
+            }
+        },
+        None => valid = false,
+    }
+    match &passport.eyr {
+        Some(year) => {
+            if year.as_bytes().len() != 4 {
+                valid = false;
+            } else {
+                match year.parse() {
+                    Ok(n) => if 2020 > n || n > 2030 {valid = false},
+                    Err(_) => valid = false,
+                }
+            }
+        },
+        None => valid = false,
+    }
+    match &passport.hcl {
+        Some(color) => {
+            let re = regex::Regex::new(r"#[0-9a-f]{6}").unwrap();
+            if !re.is_match(&color) {
+                valid = false;
+            }
+        }
+        None => valid = false,
+    }
+    match &passport.hgt {
+        Some(height) => {
+            let re = regex::Regex::new(r"(\d+)(cm|in)").unwrap();
+            if !re.is_match(&height) {
+                valid = false;
+            } else {
+                match re.captures(&height) {
+                    Some(cap) => {
+                        let hgt: u32 = cap[1].parse().unwrap();
+                        match &cap[2] {
+                            "cm" => {
+                                if hgt < 150 || hgt > 193 {
+                                    valid = false;
+                                }
+                            },
+                            "in" => {
+                                if hgt < 59 || hgt > 76 {
+                                    valid = false;
+                                }
+                            },
+                            _ => valid = false,
+                        }
+                    },
+                    None => valid = false,
+                }
+            }
+        },
+        None => valid = false,
+    }
+    match &passport.iyr {
+        Some(year) => {
+            if year.as_bytes().len() != 4 {
+                valid = false;
+            } else {
+                match year.parse() {
+                    Ok(n) => if 2010 > n || n > 2020 {valid = false},
+                    Err(_) => valid = false,
+                }
+            }
+        },
+        None => valid = false,
+    }
+    match &passport.pid {
+        Some(id) => {
+            let re = regex::Regex::new(r"^\d{9}$").unwrap();
+            if !re.is_match(&id) {
+                valid = false;
+            }
+        },
+        None => valid = false,
+    }
+    valid
+}
+
 fn parse_passports(text: &str) -> Vec<Passport> {
     let re = regex::Regex::new(r"^\W*$").unwrap();
     let mut text_with_delim = String::new();
@@ -107,7 +207,7 @@ pub fn nr_valid_passports(filename: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_passport, check_valid, parse_passports, nr_valid_passports};
+    use crate::{parse_passport, check_valid, parse_passports, nr_valid_passports, check_stricter_valid};
     use std::fs;
 
     #[test]
@@ -143,5 +243,17 @@ mod tests {
     #[test]
     fn test_nr_valid_passports() {
         assert_eq!(2, nr_valid_passports("data/example.txt"));
+    }
+
+    #[test]
+    fn test_strict_valid() {
+        let text = "pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980\n\rhcl:#623a2f";
+        assert!(check_stricter_valid(&parse_passport(&text)));
+    }
+
+    #[test]
+    fn test_strict_invalid() {
+        let text = "eyr:1972 cid:100\n\rhcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926";
+        assert!(!check_stricter_valid(&parse_passport(&text)));
     }
 }
