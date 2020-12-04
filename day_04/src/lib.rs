@@ -200,6 +200,10 @@ pub fn nr_valid_passports(filename: &str) -> u32 {
     count_valid(filename, |passport| check_valid(passport))
 }
 
+pub fn nr_strict_valid_passports(filename: &str) -> u32 {
+    count_valid(filename, |passport| check_stricter_valid(passport))
+}
+
 fn count_valid<F>(filename: &str, f: F) -> u32
     where F: Fn(&Passport) -> bool {
     let text = fs::read_to_string(filename).unwrap();
@@ -212,7 +216,7 @@ fn count_valid<F>(filename: &str, f: F) -> u32
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_passport, check_valid, parse_passports, nr_valid_passports, check_stricter_valid};
+    use crate::{parse_passport, check_valid, parse_passports, nr_valid_passports, check_stricter_valid, nr_strict_valid_passports};
     use std::fs;
 
     #[test]
@@ -260,5 +264,10 @@ mod tests {
     fn test_strict_invalid() {
         let text = "eyr:1972 cid:100\n\rhcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926";
         assert!(!check_stricter_valid(&parse_passport(&text)));
+    }
+
+    #[test]
+    fn test_nr_strict_valid_passports() {
+        assert_eq!(2, nr_strict_valid_passports("data/example.txt"));
     }
 }
