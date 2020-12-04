@@ -197,10 +197,15 @@ fn parse_passports(text: &str) -> Vec<Passport> {
 }
 
 pub fn nr_valid_passports(filename: &str) -> u32 {
+    count_valid(filename, |passport| check_valid(passport))
+}
+
+fn count_valid<F>(filename: &str, f: F) -> u32
+    where F: Fn(&Passport) -> bool {
     let text = fs::read_to_string(filename).unwrap();
     let passports = parse_passports(&text);
     passports.iter()
-        .filter(|passport| check_valid(passport))
+        .filter(|passport| f(passport))
         .fold(0, |acc, _| acc + 1)
 }
 
