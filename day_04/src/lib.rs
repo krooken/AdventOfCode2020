@@ -96,10 +96,18 @@ fn parse_passports(text: &str) -> Vec<Passport> {
     passports.iter().map(|entry| parse_passport(entry)).collect()
 }
 
+pub fn nr_valid_passports(filename: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    let passports = parse_passports(&text);
+    passports.iter()
+        .filter(|passport| check_valid(passport))
+        .fold(0, |acc, _| acc + 1)
+}
+
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_passport, check_valid, parse_passports};
+    use crate::{parse_passport, check_valid, parse_passports, nr_valid_passports};
     use std::fs;
 
     #[test]
@@ -130,5 +138,10 @@ mod tests {
         let passports = parse_passports(&text);
         assert_eq!(Some("gry".to_string()), passports.first().unwrap().ecl);
         assert_eq!(Some("59in".to_string()), passports.last().unwrap().hgt);
+    }
+
+    #[test]
+    fn test_nr_valid_passports() {
+        assert_eq!(2, nr_valid_passports("data/example.txt"));
     }
 }
