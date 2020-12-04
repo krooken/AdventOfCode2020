@@ -72,10 +72,20 @@ fn parse_passport(text: &str) -> Passport {
     passport
 }
 
+fn check_valid(passport: &Passport) -> bool {
+    passport.byr != None &&
+        passport.eyr != None &&
+        passport.ecl != None &&
+        passport.hcl != None &&
+        passport.hgt != None &&
+        passport.iyr != None &&
+        passport.pid != None
+}
+
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_passport};
+    use crate::{parse_passport, check_valid};
 
     #[test]
     fn test_parse_passport() {
@@ -91,5 +101,11 @@ mod tests {
         assert_eq!(Some("123".to_string()), parse_passport(text).cid);
         assert_eq!(Some("test".to_string()), parse_passport(text).byr);
         assert_eq!(None, parse_passport(text).pid);
+    }
+
+    #[test]
+    fn test_valid_passport() {
+        let text = "eyr:eyr_text cid:123\n\rbyr:test";
+        assert!(!check_valid(&parse_passport(text)));
     }
 }
