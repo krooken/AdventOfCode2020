@@ -101,7 +101,7 @@ pub fn get_missing_seat(filename: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{get_max_pass_id, parse_boarding_pass, read_boarding_pass};
+    use crate::{get_max_pass_id, parse_boarding_pass, read_boarding_pass, get_missing_seat};
 
     #[test]
     fn test_split() {
@@ -123,5 +123,15 @@ mod tests {
     #[test]
     fn test_max() {
         assert_eq!(820, get_max_pass_id("data/example.txt"));
+    }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(861, get_max_pass_id("data/boarding_pass.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(633, get_missing_seat("data/boarding_pass.txt"));
     }
 }
