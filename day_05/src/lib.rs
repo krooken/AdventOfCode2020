@@ -16,6 +16,12 @@ impl BoardingPass {
             column_nr: None,
         }
     }
+
+    fn id(self) -> u32 {
+        let row_nr = self.row_nr.unwrap();
+        let column_nr = self.column_nr.unwrap();
+        row_nr * 8 + column_nr
+    }
 }
 
 fn read_boarding_pass(text: &str) -> BoardingPass {
@@ -67,6 +73,26 @@ fn get_max(text: &str) -> u32 {
 pub fn get_max_pass_id(filename: &str) -> u32 {
     let text = fs::read_to_string(filename).unwrap();
     get_max(&text)
+}
+
+pub fn get_missing_seat(filename: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    let mut sorted_passes = text.lines().map(|row| {
+        let mut pass = read_boarding_pass(row);
+        parse_boarding_pass(&mut pass);
+        pass.id()
+    }).collect::<Vec<u32>>();
+    sorted_passes.sort();
+    let mut last_id = *sorted_passes.first().unwrap();
+    let mut missing_id = 0;
+    for id in sorted_passes.into_iter().skip(1) {
+        if id == last_id + 2 {
+            missing_id = id - 1;
+            break;
+        }
+        last_id = id;
+    }
+    missing_id
 }
 
 #[cfg(test)]
