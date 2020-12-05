@@ -59,9 +59,7 @@ fn get_max(text: &str) -> u32 {
         parse_boarding_pass(&mut pass);
         pass
     }).fold(0, |acc, pass| {
-        let row_nr = pass.row_nr.unwrap();
-        let column_nr = pass.column_nr.unwrap();
-        let id = row_nr * 8 + column_nr;
+        let id = pass.id();
         if id > acc {
             id
         } else {
