@@ -64,7 +64,7 @@ fn get_max(text: &str) -> u32 {
     })
 }
 
-fn get_max_pass_id(filename: &str) -> u32 {
+pub fn get_max_pass_id(filename: &str) -> u32 {
     let text = fs::read_to_string(filename).unwrap();
     get_max(&text)
 }
