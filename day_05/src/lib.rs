@@ -86,7 +86,7 @@ pub fn get_missing_seat(filename: &str) -> u32 {
             pass.id()
         })
         .collect::<Vec<u32>>();
-    sorted_passes.sort();
+    sorted_passes.sort_unstable();
     let mut last_id = *sorted_passes.first().unwrap();
     let mut missing_id = 0;
     for id in sorted_passes.into_iter().skip(1) {
