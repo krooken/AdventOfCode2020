@@ -1,3 +1,5 @@
+use std::fs;
+
 struct BoardingPass {
     row: String,
     column: String,
@@ -45,9 +47,31 @@ fn generic_binary_parse<F>(text: &str, f: F) -> u32 where F: Fn(&u8) -> u32 {
     })
 }
 
+fn get_max(text: &str) -> u32 {
+    text.lines().map(|row| {
+        let mut pass = read_boarding_pass(row);
+        parse_boarding_pass(&mut pass);
+        pass
+    }).fold(0, |acc, pass| {
+        let row_nr = pass.row_nr.unwrap();
+        let column_nr = pass.column_nr.unwrap();
+        let id = row_nr * 8 + column_nr;
+        if id > acc {
+            id
+        } else {
+            acc
+        }
+    })
+}
+
+fn get_max_pass_id(filename: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    get_max(&text)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{read_boarding_pass, parse_boarding_pass};
+    use crate::{read_boarding_pass, parse_boarding_pass, get_max_pass_id};
 
     #[test]
     fn test_split() {
@@ -64,5 +88,10 @@ mod tests {
         parse_boarding_pass(&mut pass);
         assert_eq!(Some(44), pass.row_nr);
         assert_eq!(Some(5), pass.column_nr);
+    }
+
+    #[test]
+    fn test_max() {
+        assert_eq!(820, get_max_pass_id("data/example.txt"));
     }
 }
