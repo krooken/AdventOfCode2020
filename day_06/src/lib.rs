@@ -34,15 +34,19 @@ fn get_group_all(text: &str) -> HashSet<String> {
             acc.insert(cap[0].to_string());
             acc
         })
-    }).collect();
+    }).filter(|set| set.len() > 0).collect();
     answers.iter().fold(answers[0].clone(), |acc, set| {
         acc.intersection(set).map(|elem| elem.to_string()).collect()
     })
 }
 
+fn get_flight_answers_all(text: &str) -> Vec<HashSet<String>> {
+    get_flight_answers_generic(text, |elem| get_group_all(elem))
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_group_answers, get_flight_answers, count_flight_answers, get_group_all};
+    use crate::{get_group_answers, get_flight_answers, count_flight_answers, get_group_all, get_flight_answers_all};
     use std::collections::HashSet;
     use std::fs;
 
@@ -97,5 +101,22 @@ mod tests {
     fn test_get_group_all_4() {
         let text = "a\n\rb\n\rc";
         assert_eq!(0, get_group_all(&text).len());
+    }
+
+    #[test]
+    fn test_get_group_all_5() {
+        let text = "a\n\ra\n\ra";
+        assert_eq!(1, get_group_all(&text).len());
+    }
+
+    #[test]
+    fn test_flight_answers_all() {
+        let text = fs::read_to_string("data/example.txt").unwrap();
+        let flight = get_flight_answers_all(&text);
+        assert_eq!(3, flight[0].len());
+        assert_eq!(0, flight[1].len());
+        assert_eq!(1, flight[2].len());
+        assert_eq!(1, flight[3].len());
+        assert_eq!(1, flight[4].len());
     }
 }
