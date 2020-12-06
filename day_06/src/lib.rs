@@ -44,9 +44,14 @@ fn get_flight_answers_all(text: &str) -> Vec<HashSet<String>> {
     get_flight_answers_generic(text, |elem| get_group_all(elem))
 }
 
+pub fn count_flight_answers_all(filename: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    get_flight_answers_all(&text).iter().fold(0, |acc, set| acc + set.len() as u32)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_group_answers, get_flight_answers, count_flight_answers, get_group_all, get_flight_answers_all};
+    use crate::{get_group_answers, get_flight_answers, count_flight_answers, get_group_all, get_flight_answers_all, count_flight_answers_all};
     use std::collections::HashSet;
     use std::fs;
 
@@ -118,5 +123,10 @@ mod tests {
         assert_eq!(1, flight[2].len());
         assert_eq!(1, flight[3].len());
         assert_eq!(1, flight[4].len());
+    }
+
+    #[test]
+    fn test_get_flight_count_all() {
+        assert_eq!(6, count_flight_answers_all("data/example.txt"));
     }
 }
