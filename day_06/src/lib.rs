@@ -20,9 +20,22 @@ pub fn count_flight_answers(filename: &str) -> u32 {
     get_flight_answers(&text).iter().fold(0, |acc, set| acc + set.len() as u32)
 }
 
+fn get_group_all(text: &str) -> HashSet<String> {
+    let re = regex::Regex::new(r"[a-z]").unwrap();
+    let answers: Vec<HashSet<String>> = text.lines().map(|line| {
+        re.captures_iter(line).fold(HashSet::new(), |mut acc, cap| {
+            acc.insert(cap[0].to_string());
+            acc
+        })
+    }).collect();
+    answers.iter().fold(answers[0].clone(), |acc, set| {
+        acc.intersection(set).map(|elem| elem.to_string()).collect()
+    })
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_group_answers, get_flight_answers, count_flight_answers};
+    use crate::{get_group_answers, get_flight_answers, count_flight_answers, get_group_all};
     use std::collections::HashSet;
     use std::fs;
 
@@ -53,5 +66,29 @@ mod tests {
     #[test]
     fn test_get_flight_count() {
         assert_eq!(11, count_flight_answers("data/example.txt"));
+    }
+
+    #[test]
+    fn test_get_group_all_1() {
+        let text = "abc";
+        assert_eq!(3, get_group_all(&text).len());
+    }
+
+    #[test]
+    fn test_get_group_all_2() {
+        let text = "abcx\n\rabcy\n\rabcz";
+        assert_eq!(3, get_group_all(&text).len());
+    }
+
+    #[test]
+    fn test_get_group_all_3() {
+        let text = "ab\n\rac";
+        assert_eq!(1, get_group_all(&text).len());
+    }
+
+    #[test]
+    fn test_get_group_all_4() {
+        let text = "a\n\rb\n\rc";
+        assert_eq!(0, get_group_all(&text).len());
     }
 }
