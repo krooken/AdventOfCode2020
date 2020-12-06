@@ -129,4 +129,14 @@ mod tests {
     fn test_get_flight_count_all() {
         assert_eq!(6, count_flight_answers_all("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(6532, count_flight_answers("data/answers.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(3427, count_flight_answers_all("data/answers.txt"));
+    }
 }
