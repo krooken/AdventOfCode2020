@@ -11,8 +11,15 @@ fn get_group_answers(text: &str) -> HashSet<String> {
 }
 
 fn get_flight_answers(text: &str) -> Vec<HashSet<String>> {
+    get_flight_answers_generic(text, |group| get_group_answers(group))
+}
+
+fn get_flight_answers_generic<F>(text: &str, f: F) -> Vec<HashSet<String>>
+where
+    F: Fn(&str) -> HashSet<String>
+{
     let re = regex::Regex::new(r"(?m)^\W*$").unwrap();
-    re.split(text).map(|group| get_group_answers(group)).collect()
+    re.split(text).map(|group| f(group)).collect()
 }
 
 pub fn count_flight_answers(filename: &str) -> u32 {
