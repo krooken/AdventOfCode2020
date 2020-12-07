@@ -1,7 +1,10 @@
+use std::collections::{HashMap, HashSet};
+use std::fs;
 
 struct Rule {
     bag_name: String,
     content_strings: Vec<(u32, String)>,
+    contained_in: Vec<String>,
 }
 
 fn get_rule(text: &str) -> Rule {
@@ -12,6 +15,7 @@ fn get_rule(text: &str) -> Rule {
         Rule {
             bag_name: cap[1].to_string(),
             content_strings: Vec::new(),
+            contained_in: Vec::new(),
         }
     } else {
         let re_contents = regex::Regex::new(r" (\d+) ([a-z\s]+) bags?(,|\.)").unwrap();
@@ -23,13 +27,77 @@ fn get_rule(text: &str) -> Rule {
         Rule {
             bag_name: cap[1].to_string(),
             content_strings: contents,
+            contained_in: Vec::new(),
         }
     }
 }
 
+pub fn count_bags_carrying_bag(filename: &str, bag: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    let mut map = construct_map(&text);
+    let vec = go_up_in_map(&map, bag);
+    let set: HashSet<_> = vec.iter().collect();
+    set.len() as u32
+}
+
+fn go_up_in_map(map: &HashMap<String, Rule>, name: &str) -> Vec<String> {
+    let next_rule = map.get(name).unwrap();
+    if next_rule.contained_in.is_empty() {
+        Vec::new()
+    } else {
+        let mut ancestors = Vec::new();
+        for rule in next_rule.contained_in.iter() {
+            ancestors.push(rule.to_string());
+            let mut vec = go_up_in_map(map, rule);
+            ancestors.append(&mut vec);
+        }
+        ancestors
+    }
+}
+
+fn construct_map(text: &str) -> HashMap<String, Rule> {
+    let mut map = HashMap::new();
+    for line in text.lines() {
+        let rule = get_rule(line);
+        add_rule_to_map(&mut map, rule);
+    };
+    map
+}
+
+fn add_rule_to_map(map: &mut HashMap<String, Rule>, rule: Rule) {
+    let mut current_rule: Rule;
+    match map.remove(&rule.bag_name) {
+        Some(found_rule) => {
+            current_rule = found_rule;
+            current_rule.content_strings = rule.content_strings;
+        },
+        None => current_rule = rule,
+    };
+    for (_, content_rule_string) in current_rule.content_strings.iter() {
+        let mut content_rule: Rule;
+        match map.remove(content_rule_string) {
+            Some(found_rule) => {
+                content_rule = found_rule;
+                content_rule.contained_in.push(current_rule.bag_name.to_string());
+            },
+            None => {
+                content_rule = Rule {
+                    bag_name: content_rule_string.to_string(),
+                    content_strings: Vec::new(),
+                    contained_in: vec![current_rule.bag_name.to_string()],
+                };
+            }
+        }
+        map.insert(content_rule_string.to_string(), content_rule);
+    }
+    map.insert(current_rule.bag_name.to_string(), current_rule);
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::get_rule;
+    use crate::{get_rule, go_up_in_map, construct_map, count_bags_carrying_bag};
+    use std::collections::{HashMap, HashSet};
+    use std::fs;
 
     #[test]
     fn test_get_full_bag() {
@@ -48,5 +116,11 @@ mod tests {
         let rule = get_rule(text);
         assert_eq!("dotted black".to_string(), rule.bag_name);
         assert!(rule.content_strings.is_empty());
+    }
+
+    #[test]
+    fn test_count_bags_carrying_bag() {
+        let name = "shiny gold";
+        assert_eq!(4, count_bags_carrying_bag("data/example.txt", name));
     }
 }
