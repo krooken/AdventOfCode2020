@@ -34,7 +34,7 @@ fn get_rule(text: &str) -> Rule {
 
 pub fn count_bags_carrying_bag(filename: &str, bag: &str) -> u32 {
     let text = fs::read_to_string(filename).unwrap();
-    let mut map = construct_map(&text);
+    let map = construct_map(&text);
     let vec = go_up_in_map(&map, bag);
     let set: HashSet<_> = vec.iter().collect();
     set.len() as u32
@@ -93,11 +93,24 @@ fn add_rule_to_map(map: &mut HashMap<String, Rule>, rule: Rule) {
     map.insert(current_rule.bag_name.to_string(), current_rule);
 }
 
+fn count_required_bags(map: &HashMap<String, Rule>, name: &str) -> u32 {
+    let mut sum = 1;
+    let rule = map.get(name).unwrap();
+    for (num, bag) in rule.content_strings.iter() {
+        sum += num*count_required_bags(map, bag);
+    }
+    sum
+}
+
+pub fn count_individual_bags(filename: &str, bag: &str) -> u32 {
+    let text = fs::read_to_string(filename).unwrap();
+    let map = construct_map(&text);
+    count_required_bags(&map, bag) - 1
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_rule, go_up_in_map, construct_map, count_bags_carrying_bag};
-    use std::collections::{HashMap, HashSet};
-    use std::fs;
+    use crate::{get_rule, count_bags_carrying_bag, count_individual_bags};
 
     #[test]
     fn test_get_full_bag() {
@@ -122,5 +135,10 @@ mod tests {
     fn test_count_bags_carrying_bag() {
         let name = "shiny gold";
         assert_eq!(4, count_bags_carrying_bag("data/example.txt", name));
+    }
+
+    #[test]
+    fn test_count_individual_bags() {
+        assert_eq!(32, count_individual_bags("data/example.txt", "shiny gold"));
     }
 }
