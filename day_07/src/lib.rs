@@ -141,4 +141,15 @@ mod tests {
     fn test_count_individual_bags() {
         assert_eq!(32, count_individual_bags("data/example.txt", "shiny gold"));
     }
+
+    #[test]
+    fn test_task1() {
+        let name = "shiny gold";
+        assert_eq!(335, count_bags_carrying_bag("data/bag_rules.txt", name));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(2431, count_individual_bags("data/bag_rules.txt", "shiny gold"));
+    }
 }
