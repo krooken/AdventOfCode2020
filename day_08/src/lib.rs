@@ -1,4 +1,5 @@
 use Instruction::*;
+use std::fs;
 
 #[derive(Debug, PartialEq)]
 enum Instruction {
@@ -56,6 +57,11 @@ pub fn acc_at_loop(program: &str) -> i32 {
         }
     }
     acc
+}
+
+pub fn get_acc_of_program(filename: &str) -> i32 {
+    let program = fs::read_to_string(filename).unwrap();
+    acc_at_loop(&program)
 }
 
 #[cfg(test)]
