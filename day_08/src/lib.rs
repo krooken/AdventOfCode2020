@@ -13,6 +13,12 @@ struct CodeLine {
     visited: bool,
 }
 
+struct CodeBranch {
+    instruction: Instruction,
+    next: usize,
+    possible_next: usize,
+}
+
 fn get_instruction(line: &str) -> Instruction {
     let re = regex::Regex::new(r"^(acc|jmp|nop) ((\+|-)\d+)$").unwrap();
     let cap = re.captures(line).unwrap();
@@ -64,9 +70,83 @@ pub fn get_acc_of_program(filename: &str) -> i32 {
     acc_at_loop(&program)
 }
 
+fn get_code_branch(program: &str) -> Vec<CodeBranch> {
+    program.lines().enumerate().map(|(i, line)| {
+        let instruction = get_instruction(line);
+        let (next, possible_next) = match instruction {
+            Acc(_) => (i + 1, i + 1),
+            Jmp(num) => ((i as i32 + num) as usize, i + 1),
+            Noop(num) => (i + 1, (i as i32 + num) as usize),
+        };
+        CodeBranch {
+            instruction,
+            next,
+            possible_next,
+        }
+    }).collect()
+}
+
+fn get_partition_with_start(branches: &Vec<CodeBranch>, index: usize) -> Vec<usize> {
+    let mut next = Some(index);
+    let mut partition = Vec::new();
+    while let Some(i) = next {
+        if i >= branches.len() {
+            break;
+        }
+        let branch = &branches[i];
+        if partition.contains(&i) {
+            next = None;
+        } else {
+            partition.push(i);
+            next = Some(branch.next);
+        }
+    };
+    partition
+}
+
+fn divide_into_partitions(branches: &Vec<CodeBranch>) -> Vec<Vec<usize>> {
+    let mut all_visited = Vec::new();
+    let mut partitions = Vec::new();
+    for i in 0..branches.len() {
+        if !all_visited.contains(&i) {
+            let partition = get_partition_with_start(branches, i);
+            all_visited.append(&mut partition.clone());
+            partitions.push(partition);
+        }
+    }
+    partitions
+}
+
+fn find_instruction_to_change(branches: &Vec<CodeBranch>, partitions: Vec<Vec<usize>>) -> usize {
+    let start_partition = partitions.iter().fold(Vec::new(), |acc, partition| {
+        if partition.contains(&0) {
+            partition.clone()
+        } else {
+            acc
+        }
+    });
+    let end_partitions: Vec<Vec<usize>> = partitions.iter().cloned().filter(|elem| elem.contains(&(branches.len() - 1))).collect();
+    let mut index= 0;
+    for i in start_partition.iter() {
+        let mut points_to_end = false;
+        let branch = &branches[*i];
+        for partition in end_partitions.iter() {
+            if partition.contains(&branch.possible_next) {
+                points_to_end = true;
+                break;
+            }
+        }
+        if points_to_end {
+            index = *i;
+            break;
+        }
+    }
+    index
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_instruction, get_program, acc_at_loop};
+    use crate::{get_instruction, get_program, acc_at_loop, get_code_branch, divide_into_partitions, find_instruction_to_change};
     use crate::Instruction::{Acc, Jmp, Noop};
     use std::fs;
 
@@ -97,5 +177,13 @@ mod tests {
     fn test_acc_at_loop() {
         let program = fs::read_to_string("data/example.txt").unwrap();
         assert_eq!(5, acc_at_loop(&program));
+    }
+
+    #[test]
+    fn test_find_instruction_to_change() {
+        let program = fs::read_to_string("data/example.txt").unwrap();
+        let branches = get_code_branch(&program);
+        let partitions = divide_into_partitions(&branches);
+        assert_eq!(7, find_instruction_to_change(&branches, partitions));
     }
 }
