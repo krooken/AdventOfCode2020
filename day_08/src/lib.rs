@@ -144,9 +144,35 @@ fn find_instruction_to_change(branches: &Vec<CodeBranch>, partitions: Vec<Vec<us
     index
 }
 
+pub fn get_acc_at_end(filename: &str) -> i32 {
+    let program = fs::read_to_string(filename).unwrap();
+    let code = get_code_branch(&program);
+    let partitions = divide_into_partitions(&code);
+    let index_to_change = find_instruction_to_change(&code, partitions);
+    let mut acc = 0;
+    let mut next_instruction = Some(0);
+    while let Some(i) = next_instruction {
+        let mut next = code[i].next;
+        if i == index_to_change {
+            next = code[i].possible_next;
+        }
+        if next < code.len() {
+            next_instruction = Some(next);
+        } else {
+            next_instruction = None;
+        }
+        acc = if let Acc(num) = code[i].instruction {
+            acc + num
+        } else {
+            acc
+        }
+    }
+    acc
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_instruction, get_program, acc_at_loop, get_code_branch, divide_into_partitions, find_instruction_to_change};
+    use crate::{get_instruction, get_program, acc_at_loop, get_code_branch, divide_into_partitions, find_instruction_to_change, get_acc_at_end};
     use crate::Instruction::{Acc, Jmp, Noop};
     use std::fs;
 
@@ -185,5 +211,10 @@ mod tests {
         let branches = get_code_branch(&program);
         let partitions = divide_into_partitions(&branches);
         assert_eq!(7, find_instruction_to_change(&branches, partitions));
+    }
+
+    #[test]
+    fn test_get_acc_at_end() {
+        assert_eq!(8, get_acc_at_end("data/example.txt"));
     }
 }
