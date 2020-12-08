@@ -172,7 +172,7 @@ pub fn get_acc_at_end(filename: &str) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{get_instruction, get_program, acc_at_loop, get_code_branch, divide_into_partitions, find_instruction_to_change, get_acc_at_end};
+    use crate::{get_instruction, get_program, acc_at_loop, get_code_branch, divide_into_partitions, find_instruction_to_change, get_acc_at_end, get_acc_of_program};
     use crate::Instruction::{Acc, Jmp, Noop};
     use std::fs;
 
@@ -216,5 +216,15 @@ mod tests {
     #[test]
     fn test_get_acc_at_end() {
         assert_eq!(8, get_acc_at_end("data/example.txt"));
+    }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(1584, get_acc_of_program("data/boot_code.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(920, get_acc_at_end("data/boot_code.txt"));
     }
 }
