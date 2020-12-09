@@ -90,4 +90,14 @@ mod tests {
     fn test_get_min_max_sum() {
         assert_eq!(62, get_min_max_sum("data/example.txt", 5));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(258585477, find_invalid("data/code.txt", 25));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(36981213, get_min_max_sum("data/code.txt", 25));
+    }
 }
