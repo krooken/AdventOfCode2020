@@ -63,7 +63,7 @@ pub fn get_arrangements(filename: &str) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{get_nr_differences, get_arrangements};
+    use crate::{get_nr_differences, get_arrangements, get_product};
 
     #[test]
     fn test_nr_differences() {
@@ -73,5 +73,15 @@ mod tests {
     #[test]
     fn test_arrangements() {
         assert_eq!(19208, get_arrangements("data/example.txt"));
+    }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(2482, get_product("data/adapters.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(96_717_311_574_016, get_arrangements("data/adapters.txt"));
     }
 }
