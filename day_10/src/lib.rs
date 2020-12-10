@@ -24,6 +24,11 @@ fn get_nr_differences(filename: &str) -> (u32, u32, u32) {
     result
 }
 
+pub fn get_product(filename: &str) -> u32 {
+    let (one, _, three) = get_nr_differences(filename);
+    one * three
+}
+
 #[cfg(test)]
 mod tests {
     use crate::get_nr_differences;
