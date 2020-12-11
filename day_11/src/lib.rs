@@ -8,22 +8,33 @@ enum Occupied {
     Floor,
 }
 
+fn find_neigbors(seating: &Vec<Vec<Occupied>>, i: usize, j: usize) -> u32 {
+    let mut nr_neighbors = 0;
+    let i_32 = i as i32;
+    let i_low = max(0, i_32-1) as usize;
+    let i_high = min(i_32+2, seating.len() as i32) as usize;
+    let j_32 = j as i32;
+    let j_low = max(0, j_32-1) as usize;
+    let j_high = min(j_32+2, seating[i].len() as i32) as usize;
+    for k in i_low..i_high {
+        for l in j_low..j_high {
+            if !(k == i && l == j) {
+                if let Occupied::Taken = seating[k][l] {
+                    nr_neighbors += 1;
+                }
+            }
+        }
+    };
+    nr_neighbors
+}
+
 fn simulation_step(seating: &Vec<Vec<Occupied>>) -> (Vec<Vec<Occupied>>, bool) {
     let mut next_step = Vec::new();
     let mut updated = false;
     for i in 0..seating.len() {
         next_step.push(Vec::new());
         for j in 0..seating[i].len() {
-            let mut nr_neighbors = 0;
-            for k in max(0, (i as i32)-1) as usize..min(i as i32+2, seating.len() as i32) as usize {
-                for l in max(0, (j as i32)-1) as usize..min(j as i32+2, seating[i].len() as i32) as usize {
-                    if !(k == i && l == j) {
-                        if let Occupied::Taken = seating[k][l] {
-                            nr_neighbors += 1;
-                        }
-                    }
-                }
-            }
+            let nr_neighbors = find_neigbors(seating, i, j);
             match seating[i][j] {
                 Occupied::Free => {
                     if nr_neighbors == 0 {
