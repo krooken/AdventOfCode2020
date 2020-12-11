@@ -29,24 +29,7 @@ fn find_neigbors(seating: &Vec<Vec<Occupied>>, i: usize, j: usize) -> u32 {
 }
 
 fn update_by_neighbors(seating: &Vec<Vec<Occupied>>, i: usize, j: usize) -> (Occupied, bool) {
-    let nr_neighbors = find_neigbors(seating, i, j);
-    match seating[i][j] {
-        Occupied::Free => {
-            if nr_neighbors == 0 {
-                (Occupied::Taken, true)
-            } else {
-                (Occupied::Free, false)
-            }
-        },
-        Occupied::Taken => {
-            if nr_neighbors >= 4 {
-                (Occupied::Free, true)
-            } else {
-                (Occupied::Taken, false)
-            }
-        },
-        Occupied::Floor => (Occupied::Floor, false),
-    }
+    update_by(seating, i, j, |board, k, l| find_neigbors(board, k, l))
 }
 
 fn simulation_step<F>(seating: &Vec<Vec<Occupied>>, f: F) -> (Vec<Vec<Occupied>>, bool)
@@ -108,6 +91,28 @@ pub fn simulate(filename: &str) -> u32 {
     count_occupied(&board)
 }
 
+
+fn update_by<F>(seating: &Vec<Vec<Occupied>>, i: usize, j: usize, f: F) -> (Occupied, bool)
+where F: Fn(&Vec<Vec<Occupied>>, usize, usize) -> u32 {
+    let nr_neighbors = f(seating, i, j);
+    match seating[i][j] {
+        Occupied::Free => {
+            if nr_neighbors == 0 {
+                (Occupied::Taken, true)
+            } else {
+                (Occupied::Free, false)
+            }
+        },
+        Occupied::Taken => {
+            if nr_neighbors >= 4 {
+                (Occupied::Free, true)
+            } else {
+                (Occupied::Taken, false)
+            }
+        },
+        Occupied::Floor => (Occupied::Floor, false),
+    }
+}
 #[cfg(test)]
 mod tests {
     use crate::{read_seating, count_occupied, simulate, simulation_step_with_neighbors};
