@@ -28,32 +28,37 @@ fn find_neigbors(seating: &Vec<Vec<Occupied>>, i: usize, j: usize) -> u32 {
     nr_neighbors
 }
 
-fn simulation_step(seating: &Vec<Vec<Occupied>>) -> (Vec<Vec<Occupied>>, bool) {
+fn update_by_neighbors(seating: &Vec<Vec<Occupied>>, i: usize, j: usize) -> (Occupied, bool) {
+    let nr_neighbors = find_neigbors(seating, i, j);
+    match seating[i][j] {
+        Occupied::Free => {
+            if nr_neighbors == 0 {
+                (Occupied::Taken, true)
+            } else {
+                (Occupied::Free, false)
+            }
+        },
+        Occupied::Taken => {
+            if nr_neighbors >= 4 {
+                (Occupied::Free, true)
+            } else {
+                (Occupied::Taken, false)
+            }
+        },
+        Occupied::Floor => (Occupied::Floor, false),
+    }
+}
+
+fn simulation_step<F>(seating: &Vec<Vec<Occupied>>, f: F) -> (Vec<Vec<Occupied>>, bool)
+where F: Fn(&Vec<Vec<Occupied>>, usize, usize) -> (Occupied, bool) {
     let mut next_step = Vec::new();
     let mut updated = false;
     for i in 0..seating.len() {
         next_step.push(Vec::new());
         for j in 0..seating[i].len() {
-            let nr_neighbors = find_neigbors(seating, i, j);
-            match seating[i][j] {
-                Occupied::Free => {
-                    if nr_neighbors == 0 {
-                        next_step[i].push(Occupied::Taken);
-                        updated = true;
-                    } else {
-                        next_step[i].push(Occupied::Free);
-                    }
-                },
-                Occupied::Taken => {
-                    if nr_neighbors >= 4 {
-                        next_step[i].push(Occupied::Free);
-                        updated = true;
-                    } else {
-                        next_step[i].push(Occupied::Taken);
-                    }
-                },
-                Occupied::Floor => next_step[i].push(Occupied::Floor),
-            }
+            let (occ, up) = f(seating, i, j);
+            updated |= up;
+            next_step[i].push(occ);
         }
     }
     (next_step, updated)
@@ -86,11 +91,17 @@ fn read_seating(filename: &str) -> Vec<Vec<Occupied>> {
     }).collect()
 }
 
+fn simulation_step_with_neighbors(seating: &Vec<Vec<Occupied>>) -> (Vec<Vec<Occupied>>, bool) {
+    simulation_step(&seating, |b, i, j| {
+            update_by_neighbors(b, i, j)
+        })
+}
+
 pub fn simulate(filename: &str) -> u32 {
     let mut board = read_seating(filename);
     let mut updated = true;
     while updated {
-        let (next, up) = simulation_step(&board);
+        let (next, up) = simulation_step_with_neighbors(&board);
         board = next;
         updated = up;
     }
@@ -99,7 +110,7 @@ pub fn simulate(filename: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{read_seating, count_occupied, simulation_step, simulate};
+    use crate::{read_seating, count_occupied, simulate, simulation_step_with_neighbors};
 
     #[test]
     fn test_count_and_read() {
@@ -110,7 +121,7 @@ mod tests {
     #[test]
     fn test_simulation_step1() {
         let seating = read_seating("data/example.txt");
-        let (next_step, updated) = simulation_step(&seating);
+        let (next_step, updated) = simulation_step_with_neighbors(&seating);
         assert_eq!(71, count_occupied(&next_step));
         assert!(updated);
     }
@@ -119,7 +130,7 @@ mod tests {
     fn test_simulation_step2() {
         let mut next_step = read_seating("data/example.txt");
         for _ in 0..2 {
-            let (next, updated) = simulation_step(&next_step);
+            let (next, updated) = simulation_step_with_neighbors(&next_step);
             next_step = next;
             assert!(updated);
         }
@@ -130,7 +141,7 @@ mod tests {
     fn test_simulation_step5() {
         let mut next_step = read_seating("data/example.txt");
         for _ in 0..5 {
-            let (next, updated) = simulation_step(&next_step);
+            let (next, updated) = simulation_step_with_neighbors(&next_step);
             next_step = next;
             assert!(updated);
         }
