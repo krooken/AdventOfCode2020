@@ -8,8 +8,9 @@ enum Occupied {
     Floor,
 }
 
-fn simulation_step(seating: &Vec<Vec<Occupied>>) -> Vec<Vec<Occupied>> {
+fn simulation_step(seating: &Vec<Vec<Occupied>>) -> (Vec<Vec<Occupied>>, bool) {
     let mut next_step = Vec::new();
+    let mut updated = false;
     for i in 0..seating.len() {
         next_step.push(Vec::new());
         for j in 0..seating[i].len() {
@@ -27,6 +28,7 @@ fn simulation_step(seating: &Vec<Vec<Occupied>>) -> Vec<Vec<Occupied>> {
                 Occupied::Free => {
                     if nr_neighbors == 0 {
                         next_step[i].push(Occupied::Taken);
+                        updated = true;
                     } else {
                         next_step[i].push(Occupied::Free);
                     }
@@ -34,6 +36,7 @@ fn simulation_step(seating: &Vec<Vec<Occupied>>) -> Vec<Vec<Occupied>> {
                 Occupied::Taken => {
                     if nr_neighbors >= 4 {
                         next_step[i].push(Occupied::Free);
+                        updated = true;
                     } else {
                         next_step[i].push(Occupied::Taken);
                     }
@@ -42,7 +45,7 @@ fn simulation_step(seating: &Vec<Vec<Occupied>>) -> Vec<Vec<Occupied>> {
             }
         }
     }
-    next_step
+    (next_step, updated)
 }
 
 fn count_occupied(seating: &Vec<Vec<Occupied>>) -> u32 {
@@ -85,15 +88,18 @@ mod tests {
     #[test]
     fn test_simulation_step1() {
         let seating = read_seating("data/example.txt");
-        let next_step = simulation_step(&seating);
+        let (next_step, updated) = simulation_step(&seating);
         assert_eq!(71, count_occupied(&next_step));
+        assert!(updated);
     }
 
     #[test]
     fn test_simulation_step2() {
         let mut next_step = read_seating("data/example.txt");
         for _ in 0..2 {
-            next_step = simulation_step(&next_step);
+            let (next, updated) = simulation_step(&next_step);
+            next_step = next;
+            assert!(updated);
         }
         assert_eq!(20, count_occupied(&next_step));
     }
@@ -102,7 +108,9 @@ mod tests {
     fn test_simulation_step5() {
         let mut next_step = read_seating("data/example.txt");
         for _ in 0..5 {
-            next_step = simulation_step(&next_step);
+            let (next, updated) = simulation_step(&next_step);
+            next_step = next;
+            assert!(updated);
         }
         assert_eq!(37, count_occupied(&next_step));
     }
