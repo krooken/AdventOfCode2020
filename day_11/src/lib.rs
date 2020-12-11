@@ -250,4 +250,14 @@ mod tests {
     fn test_visible_simulate() {
         assert_eq!(26, simulate_visible("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(2254, simulate("data/seats.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(2004, simulate_visible("data/seats.txt"));
+    }
 }
