@@ -75,9 +75,20 @@ fn read_seating(filename: &str) -> Vec<Vec<Occupied>> {
     }).collect()
 }
 
+pub fn simulate(filename: &str) -> u32 {
+    let mut board = read_seating(filename);
+    let mut updated = true;
+    while updated {
+        let (next, up) = simulation_step(&board);
+        board = next;
+        updated = up;
+    }
+    count_occupied(&board)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{read_seating, count_occupied, simulation_step};
+    use crate::{read_seating, count_occupied, simulation_step, simulate};
 
     #[test]
     fn test_count_and_read() {
@@ -113,5 +124,10 @@ mod tests {
             assert!(updated);
         }
         assert_eq!(37, count_occupied(&next_step));
+    }
+
+    #[test]
+    fn test_simulate() {
+        assert_eq!(37, simulate("data/example.txt"));
     }
 }
