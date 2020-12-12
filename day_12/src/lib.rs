@@ -1,3 +1,5 @@
+use std::fs;
+
 enum Orientation {
     East,
     North,
@@ -90,7 +92,7 @@ fn get_commands(text: &str) -> Vec<Command> {
     }).collect()
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum Command {
     East(i64),
     North(i64),
@@ -101,9 +103,19 @@ enum Command {
     Left(i64),
 }
 
+pub fn sail_to_destination(filename: &str) -> i64 {
+    let text = fs::read_to_string(filename).unwrap();
+    let commands = get_commands(&text);
+    let mut pos = Position::new();
+    for command in commands.iter() {
+        pos.sail(*command);
+    }
+    pos.manhattan()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{Position, Command, get_commands};
+    use crate::{Position, Command, get_commands, sail_to_destination};
     use std::fs;
 
     #[test]
@@ -131,5 +143,10 @@ mod tests {
         let commands = get_commands(&text);
         assert_eq!(Command::Forward(10), commands[0]);
         assert_eq!(Command::Right(90), commands[3]);
+    }
+
+    #[test]
+    fn test_destination() {
+        assert_eq!(25, sail_to_destination("data/example.txt"));
     }
 }
