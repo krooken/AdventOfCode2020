@@ -72,6 +72,78 @@ impl Position {
             _ => panic!(),
         }
     }
+
+    fn forward(&mut self, waypoint: &Waypoint, num: i64) {
+        self.east += waypoint.east * num;
+        self.north += waypoint.north * num;
+    }
+}
+
+struct Waypoint {
+    north: i64,
+    east: i64,
+}
+
+impl Waypoint {
+
+    fn new() -> Waypoint {
+        Waypoint {
+            north: 1,
+            east: 10,
+        }
+    }
+
+    fn translate(&mut self, command: &Command) {
+        match command {
+            Command::East(num) => self.east += num,
+            Command::North(num) => self.north += num,
+            Command::West(num) => self.east -= num,
+            Command::South(num) => self.north -= num,
+            _ => panic!(),
+        }
+    }
+
+    fn ccw(&mut self) {
+        let east = self.east;
+        let north = self.north;
+        self.north = east;
+        self.east = -north;
+    }
+
+    fn cw(&mut self) {
+        let east = self.east;
+        let north = self.north;
+        self.north = -east;
+        self.east = north;
+    }
+
+    fn rotate(&mut self, command: &Command) {
+        match command {
+            Command::Right(num) => {
+                for _ in 0..num/90 {
+                    self.cw();
+                }
+            },
+            Command::Left(num) => {
+                for _ in 0..num/90 {
+                    self.ccw();
+                }
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn command(&mut self, command: &Command) {
+        match command {
+            Command::North(_)
+            | Command::East(_)
+            | Command::West(_)
+            | Command::South(_) => self.translate(command),
+            Command::Right(_)
+            | Command::Left(_) => self.rotate(command),
+            _ => panic!(),
+        }
+    }
 }
 
 fn get_commands(text: &str) -> Vec<Command> {
@@ -113,9 +185,27 @@ pub fn sail_to_destination(filename: &str) -> i64 {
     pos.manhattan()
 }
 
+fn sail(pos: &mut Position, waypoint: &mut Waypoint, command: &Command) {
+    match command {
+        Command::Forward(num) => pos.forward(waypoint, *num),
+        _ => waypoint.command(command),
+    }
+}
+
+pub fn sail_with_waypoint(filename: &str) -> i64 {
+    let text = fs::read_to_string(filename).unwrap();
+    let commands = get_commands(&text);
+    let mut pos = Position::new();
+    let mut waypoint = Waypoint::new();
+    for command in commands.iter() {
+        sail(&mut pos, &mut waypoint, command);
+    }
+    pos.manhattan()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{Position, Command, get_commands, sail_to_destination};
+    use crate::{Position, Command, get_commands, sail_to_destination, sail_with_waypoint, Waypoint, sail};
     use std::fs;
 
     #[test]
@@ -148,5 +238,36 @@ mod tests {
     #[test]
     fn test_destination() {
         assert_eq!(25, sail_to_destination("data/example.txt"));
+    }
+
+    #[test]
+    fn test_forward() {
+        let command = Command::Forward(10);
+        let mut waypoint = Waypoint::new();
+        let mut pos = Position::new();
+        sail(&mut pos, &mut waypoint, &command);
+        assert_eq!(110, pos.manhattan());
+    }
+
+    #[test]
+    fn test_commands() {
+        let commands = vec![
+            Command::Forward(10),
+            Command::North(3),
+            Command::Forward(7),
+            Command::Right(90),
+            Command::Forward(11),
+        ];
+        let mut waypoint = Waypoint::new();
+        let mut pos = Position::new();
+        for command in commands.iter() {
+            sail(&mut pos, &mut waypoint, command);
+        }
+        assert_eq!(286, pos.manhattan());
+    }
+
+    #[test]
+    fn test_sail_with_waypoint() {
+        assert_eq!(286, sail_with_waypoint("data/example.txt"));
     }
 }
