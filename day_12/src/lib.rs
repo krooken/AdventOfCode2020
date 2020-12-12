@@ -72,6 +72,25 @@ impl Position {
     }
 }
 
+fn get_commands(text: &str) -> Vec<Command> {
+    let re = regex::Regex::new(r"(^E|N|W|S|F|R|L)(\d+)$").unwrap();
+    text.lines().map(|line| {
+        let cap = re.captures_iter(line).next().unwrap();
+        let num: i64 = cap[2].parse().unwrap();
+        match &cap[1] {
+            "E" => Command::East(num),
+            "N" => Command::North(num),
+            "W" => Command::West(num),
+            "S" => Command::South(num),
+            "F" => Command::Forward(num),
+            "R" => Command::Right(num),
+            "L" => Command::Left(num),
+            _ => panic!(),
+        }
+    }).collect()
+}
+
+#[derive(Debug, PartialEq)]
 enum Command {
     East(i64),
     North(i64),
@@ -84,7 +103,8 @@ enum Command {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Position, Command};
+    use crate::{Position, Command, get_commands};
+    use std::fs;
 
     #[test]
     fn test_manhattan() {
@@ -103,5 +123,13 @@ mod tests {
         pos.sail(Command::Right(90));
         pos.sail(Command::Forward(11));
         assert_eq!(25, pos.manhattan());
+    }
+
+    #[test]
+    fn test_get_commands() {
+        let text = fs::read_to_string("data/example.txt").unwrap();
+        let commands = get_commands(&text);
+        assert_eq!(Command::Forward(10), commands[0]);
+        assert_eq!(Command::Right(90), commands[3]);
     }
 }
