@@ -19,7 +19,7 @@ impl Rule {
 
 fn get_rules(text: &str) -> Vec<Rule> {
     text.lines().map(|line| {
-        let re = regex::Regex::new(r"^([^:]+): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
+        let re = Regex::new(r"^([^:]+): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
         let cap = re.captures(line).unwrap();
         Rule::new(
             &cap[1],
@@ -28,9 +28,15 @@ fn get_rules(text: &str) -> Vec<Rule> {
     }).collect()
 }
 
+fn get_ticket_data(text: &str) -> Vec<Vec<u32>> {
+    text.lines().map(|line| {
+        line.split(",").map(|n| n.parse().unwrap()).collect()
+    }).collect()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::get_rules;
+    use crate::{get_rules, get_ticket_data};
     use std::fs;
 
     #[test]
@@ -40,5 +46,12 @@ mod tests {
         assert_eq!("class", rules[0].name);
         assert_eq!((1, 3), rules[0].low_range);
         assert_eq!((5, 7), rules[0].high_range);
+    }
+
+    #[test]
+    fn test_ticket_data() {
+        let text = fs::read_to_string("data/example_nearby_tickets.txt").unwrap();
+        let tickets = get_ticket_data(&text);
+        assert_eq!(vec![7, 3, 47], tickets[0]);
     }
 }
