@@ -31,9 +31,34 @@ fn get_coordinates(text: &str) -> Vec<(i64, i64, i64)> {
     }).flatten().collect()
 }
 
+fn print_grid(cubes: &Vec<(i64, i64, i64)>) {
+    let min = min_coordinate(cubes);
+    let max = max_coordinate(cubes);
+    for z in min.2..max.2+1 {
+        println!("z={}", z);
+        for y in min.1..max.1+1 {
+            for x in min.0..max.0+1 {
+                let mut exists = false;
+                for coord in cubes {
+                    if coord == &(x, y, z) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if exists {
+                    print!("#");
+                } else {
+                    print!(".");
+                }
+            }
+            println!();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_coordinates, min_coordinate, max_coordinate};
+    use crate::{get_coordinates, min_coordinate, max_coordinate, print_grid};
     use std::fs;
 
     #[test]
