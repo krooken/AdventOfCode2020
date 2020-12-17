@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::fs;
 
 struct Rule {
     name: String,
@@ -52,9 +53,20 @@ fn get_valid_in_some(rules: &Vec<Rule>, ticket_data: &Vec<Vec<u32>>) -> Vec<Vec<
     }).collect()
 }
 
+pub fn count_valid_tickets(rules_file: &str, ticket_file: &str) -> u32 {
+    let text = fs::read_to_string(rules_file).unwrap();
+    let rules = get_rules(&text);
+    let text = fs::read_to_string(ticket_file).unwrap();
+    let tickets = get_ticket_data(&text);
+    let valid = get_valid_in_some(&rules, &tickets);
+    valid.iter().flatten().zip(tickets.iter().flatten()).fold(0, |acc, (b, num)| {
+        acc + if *b {0} else {*num}
+    })
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_rules, get_ticket_data, get_valid_in_some};
+    use crate::{get_rules, get_ticket_data, get_valid_in_some, count_valid_tickets};
     use std::fs;
 
     #[test]
@@ -81,5 +93,10 @@ mod tests {
         let tickets = get_ticket_data(&text);
         let valid = get_valid_in_some(&rules, &tickets);
         assert_eq!(vec![true, false, true], valid[1]);
+    }
+
+    #[test]
+    fn test_count_valid_tickets() {
+        assert_eq!(71, count_valid_tickets("data/example_rules.txt", "data/example_nearby_tickets.txt"));
     }
 }
