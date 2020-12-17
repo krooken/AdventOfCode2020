@@ -77,14 +77,17 @@ fn step(cubes: &Vec<(i64, i64, i64)>) -> Vec<(i64, i64, i64)> {
     for x in min.0-1..max.0+2 {
         for y in min.1-1..max.1+2 {
             for z in min.2-1..max.2+2 {
-                let mut occupied = false;
                 let pos = (x, y, z);
-                for coord in cubes {
+                let occupied = match cubes.iter().try_fold(false, |_, coord| {
                     if coord == &pos {
-                        occupied = true;
-                        break;
+                        None
+                    } else {
+                        Some(false)
                     }
-                }
+                }) {
+                    Some(res) => res,
+                    None => true,
+                };
                 let nr_neighbors = nr_neighbors(cubes, &pos);
                 if occupied && (nr_neighbors == 2 || nr_neighbors == 3) {
                     next_grid.push(pos);
