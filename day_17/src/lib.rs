@@ -266,4 +266,14 @@ mod tests {
     fn test_simulate4() {
         assert_eq!(848, simulate4("data/example.txt"));
     }
+
+    #[test]
+    fn test_simulate_task1() {
+        assert_eq!(333, simulate("data/cubes.txt"));
+    }
+
+    #[test]
+    fn test_simulate_task2() {
+        assert_eq!(2676, simulate4("data/cubes.txt"));
+    }
 }
