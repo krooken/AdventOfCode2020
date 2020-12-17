@@ -60,9 +60,9 @@ fn distance((x1, y1, z1): &(i64, i64, i64), (x2, y2, z2): &(i64, i64, i64)) -> i
     *[(x1 - x2).abs(), (y1 - y2).abs(), (z1 - z2).abs()].iter().max().unwrap()
 }
 
-fn nr_neighbors(cubes: &Vec<(i64, i64, i64)>, coord: (i64, i64, i64)) -> u32 {
+fn nr_neighbors(cubes: &Vec<(i64, i64, i64)>, coord: &(i64, i64, i64)) -> u32 {
     cubes.iter().fold(0, |acc, e| {
-        if distance(&coord, e) == 1 {
+        if distance(coord, e) == 1 {
             acc + 1
         } else {
             acc
@@ -70,9 +70,36 @@ fn nr_neighbors(cubes: &Vec<(i64, i64, i64)>, coord: (i64, i64, i64)) -> u32 {
     })
 }
 
+fn step(cubes: &Vec<(i64, i64, i64)>) -> Vec<(i64, i64, i64)> {
+    let mut next_grid = Vec::new();
+    let max = max_coordinate(cubes);
+    let min = min_coordinate(cubes);
+    for x in min.0-1..max.0+2 {
+        for y in min.1-1..max.1+2 {
+            for z in min.2-1..max.2+2 {
+                let mut occupied = false;
+                let pos = (x, y, z);
+                for coord in cubes {
+                    if coord == &pos {
+                        occupied = true;
+                        break;
+                    }
+                }
+                let nr_neighbors = nr_neighbors(cubes, &pos);
+                if occupied && (nr_neighbors == 2 || nr_neighbors == 3) {
+                    next_grid.push(pos);
+                } else if !occupied && nr_neighbors == 3 {
+                    next_grid.push(pos);
+                }
+            }
+        }
+    }
+    next_grid
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_coordinates, min_coordinate, max_coordinate, print_grid, nr_neighbors};
+    use crate::{get_coordinates, min_coordinate, max_coordinate, print_grid, nr_neighbors, step};
     use std::fs;
 
     #[test]
@@ -87,6 +114,14 @@ mod tests {
     fn test_neighbors() {
         let text = fs::read_to_string("data/example.txt").unwrap();
         let coords = get_coordinates(&text);
-        assert_eq!(3, nr_neighbors(&coords, (0, 1, 0)));
+        assert_eq!(3, nr_neighbors(&coords, &(0, 1, 0)));
+    }
+
+    #[test]
+    fn test_step() {
+        let text = fs::read_to_string("data/example.txt").unwrap();
+        let coords = get_coordinates(&text);
+        let next_grid = step(&coords);
+        assert_eq!(2, nr_neighbors(&next_grid, &(0, 0, -1)));
     }
 }
