@@ -1,3 +1,5 @@
+use std::fs;
+
 fn extreme_coordinate<F>(cubes: &Vec<(i64, i64, i64)>, f: F) -> (i64, i64, i64)
 where F: Fn(i64, i64) -> bool {
     cubes.iter().fold((0, 0, 0), |(x_acc, y_acc, z_acc), (x, y, z)| {
@@ -100,9 +102,18 @@ fn step(cubes: &Vec<(i64, i64, i64)>) -> Vec<(i64, i64, i64)> {
     next_grid
 }
 
+pub fn simulate(filename: &str) -> usize {
+    let text = fs::read_to_string(filename).unwrap();
+    let mut coords = get_coordinates(&text);
+    for _ in 0..6 {
+        coords = step(&coords);
+    }
+    coords.len()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_coordinates, min_coordinate, max_coordinate, print_grid, nr_neighbors, step};
+    use crate::{get_coordinates, min_coordinate, max_coordinate, print_grid, nr_neighbors, step, simulate};
     use std::fs;
 
     #[test]
@@ -126,5 +137,10 @@ mod tests {
         let coords = get_coordinates(&text);
         let next_grid = step(&coords);
         assert_eq!(2, nr_neighbors(&next_grid, &(0, 0, -1)));
+    }
+
+    #[test]
+    fn test_simulate() {
+        assert_eq!(112, simulate("data/example.txt"));
     }
 }
