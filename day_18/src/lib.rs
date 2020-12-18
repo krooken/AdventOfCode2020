@@ -1,5 +1,6 @@
 use regex::Regex;
 use crate::Symbol::Lparen;
+use std::fs;
 
 enum Symbol {
     Num(i64),
@@ -69,9 +70,14 @@ fn calculate_row(row: &str) -> i64 {
     }
 }
 
+pub fn sum_expressions(filename: &str) -> i64 {
+    let text = fs::read_to_string(filename).unwrap();
+    text.lines().map(|line| calculate_row(line)).sum()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::calculate_row;
+    use crate::{calculate_row, sum_expressions};
 
     #[test]
     fn test_calculate_row() {
@@ -81,5 +87,10 @@ mod tests {
     #[test]
     fn test_calculate_row_paren() {
         assert_eq!(51, calculate_row("1 + (2 * 3) + (4 * (5 +6))"));
+    }
+
+    #[test]
+    fn test_sum_expressions() {
+        assert_eq!(26+437+12240+13632, sum_expressions("data/example.txt"));
     }
 }
