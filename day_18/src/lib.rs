@@ -196,9 +196,16 @@ fn calculate_row_precedence(text: &str) -> i64 {
     parse_row(text).calculate()
 }
 
+pub fn sum_expressions_precedence(filename: &str) -> i64 {
+    let text = fs::read_to_string(filename).unwrap();
+    text.lines().map(|line| {
+        calculate_row_precedence(line)
+    }).sum()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{calculate_row, sum_expressions, calculate_row_precedence};
+    use crate::{calculate_row, sum_expressions, calculate_row_precedence, sum_expressions_precedence};
 
     #[test]
     fn test_calculate_row() {
@@ -223,5 +230,10 @@ mod tests {
     #[test]
     fn test_calculate_row_precedence_paren() {
         assert_eq!(51, calculate_row_precedence("1 + (2 * 3) + (4 * (5 + 6))"));
+    }
+
+    #[test]
+    fn test_sum_expressions_precedence() {
+        assert_eq!(46 + 1445 + 669_060 + 23_340, sum_expressions_precedence("data/example.txt"));
     }
 }
