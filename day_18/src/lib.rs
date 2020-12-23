@@ -236,4 +236,14 @@ mod tests {
     fn test_sum_expressions_precedence() {
         assert_eq!(46 + 1445 + 669_060 + 23_340, sum_expressions_precedence("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(2743012121210, sum_expressions("data/math.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(65658760783597, sum_expressions_precedence("data/math.txt"));
+    }
 }
