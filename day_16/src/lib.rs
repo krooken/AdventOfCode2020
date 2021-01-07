@@ -80,7 +80,7 @@ fn find_assignment(possible_rules: &Vec<Vec<usize>>, used_rules: &mut Vec<usize>
                     vec.push(*id);
                     Some(vec)
                 },
-                None => None,
+                None => result,
             };
         }
     }
@@ -127,7 +127,7 @@ fn get_valid_tickets(rules: &Vec<Rule>, ticket_data: &Vec<Vec<u32>>) -> Vec<Vec<
         .collect()
 }
 
-pub fn multiply_fields(rules_file: &str, tickets_file: &str, my_ticket_file: &str, field_name: &str) -> u32 {
+pub fn multiply_fields(rules_file: &str, tickets_file: &str, my_ticket_file: &str, field_name: &str) -> u64 {
     let text = fs::read_to_string(rules_file).unwrap();
     let rules = get_rules(&text);
     let text = fs::read_to_string(tickets_file).unwrap();
@@ -145,8 +145,8 @@ pub fn multiply_fields(rules_file: &str, tickets_file: &str, my_ticket_file: &st
             }
         })
         .map(|(i, _)| i).collect();
-    fields.iter().fold(1, |acc, e| {
-        acc * my_ticket[*e]
+    fields.iter().fold(1u64, |acc, e| {
+        acc * (my_ticket[*e] as u64)
     })
 }
 
@@ -210,5 +210,23 @@ mod tests {
             "data/example_nearby_tickets.txt",
             "data/example_my_ticket.txt",
             "seat"));
+    }
+
+    #[test]
+    fn test_task1() {
+        let rule_file = "data/rules.txt";
+        let tickets_file = "data/nearby_tickets.txt";
+        let sum = count_valid_tickets(rule_file, tickets_file);
+        assert_eq!(23115, sum);
+    }
+
+    #[test]
+    fn test_task2() {
+        let rule_file = "data/rules.txt";
+        let tickets_file = "data/nearby_tickets.txt";
+        let my_ticket_file = "data/my_ticket.txt";
+        let prefix = "departure";
+        let product = multiply_fields(rule_file, tickets_file, my_ticket_file, prefix);
+        assert_eq!(239727793813, product);
     }
 }
