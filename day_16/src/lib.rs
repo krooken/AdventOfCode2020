@@ -64,9 +64,58 @@ pub fn count_valid_tickets(rules_file: &str, ticket_file: &str) -> u32 {
     })
 }
 
+fn find_assignment(possible_rules: &Vec<Vec<usize>>, used_rules: &mut Vec<usize>, index: usize) -> Option<Vec<usize>> {
+    let mut result = None;
+    if index == possible_rules.len() {
+        result = Some(Vec::new());
+    } else {
+        for id in &possible_rules[index] {
+            if used_rules.contains(&id) {
+                continue;
+            }
+            let mut new_used = used_rules.clone();
+            new_used.push(*id);
+            result = match find_assignment(possible_rules, &mut new_used, index + 1) {
+                Some(mut vec) => {
+                    vec.push(*id);
+                    Some(vec)
+                },
+                None => None,
+            };
+        }
+    }
+    result
+}
+
+fn get_field_names(rules: &Vec<Rule>, ticket_data: &Vec<Vec<u32>>) -> Vec<String> {
+    let mut res = Vec::new();
+    let mut possible_rules = Vec::new();
+    for i in 0..ticket_data[0].len() {
+        let mut possible = Vec::new();
+        for (j, rule) in rules.iter().enumerate() {
+            let mut valid = true;
+            for row in ticket_data {
+                if !rule.valid_for_rule(&row[i]) {
+                    valid = false;
+                    break;
+                }
+            }
+            if valid {
+                possible.push(j);
+            }
+        }
+        possible_rules.push(possible);
+    }
+    let assignment = find_assignment(&possible_rules, &mut Vec::new(), 0).unwrap();
+    for id in assignment.iter().rev() {
+        res.push(rules[*id].name.to_string());
+    }
+    res
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_rules, get_ticket_data, get_valid_in_some, count_valid_tickets};
+    use crate::{get_rules, get_ticket_data, get_valid_in_some, count_valid_tickets, get_field_names};
     use std::fs;
 
     #[test]
@@ -98,5 +147,22 @@ mod tests {
     #[test]
     fn test_count_valid_tickets() {
         assert_eq!(71, count_valid_tickets("data/example_rules.txt", "data/example_nearby_tickets.txt"));
+    }
+
+    #[test]
+    fn test_get_field_names() {
+        let text = fs::read_to_string("data/example_rules.txt").unwrap();
+        let rules = get_rules(&text);
+        let text = fs::read_to_string("data/example_nearby_tickets.txt").unwrap();
+        let tickets = get_ticket_data(&text);
+        let valid = get_valid_in_some(&rules, &tickets);
+        let tickets = valid.iter().zip(tickets.iter()).filter(|(valid_row, ticket_row)| {
+            valid_row.iter().zip(ticket_row.iter()).fold(true, |acc, e| {
+                acc && *e.0
+            })
+        }).map(|row| {
+            row.1.clone()
+        }).collect();
+        assert_eq!(vec!["row", "class", "seat"], get_field_names(&rules, &tickets));
     }
 }
