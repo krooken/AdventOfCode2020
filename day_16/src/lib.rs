@@ -113,9 +113,46 @@ fn get_field_names(rules: &Vec<Rule>, ticket_data: &Vec<Vec<u32>>) -> Vec<String
     res
 }
 
+fn all_valid(row: &Vec<bool>) -> bool {
+    row.iter().fold(true, |acc, e| acc && *e)
+}
+
+fn get_valid_tickets(rules: &Vec<Rule>, ticket_data: &Vec<Vec<u32>>) -> Vec<Vec<u32>> {
+    let valids = get_valid_in_some(rules, ticket_data);
+    ticket_data.iter().zip(valids.iter())
+        .filter(|(_, valid_row)| {
+            all_valid(*valid_row)
+        })
+        .map(|(ticket_row, _)| ticket_row.clone())
+        .collect()
+}
+
+pub fn multiply_fields(rules_file: &str, tickets_file: &str, my_ticket_file: &str, field_name: &str) -> u32 {
+    let text = fs::read_to_string(rules_file).unwrap();
+    let rules = get_rules(&text);
+    let text = fs::read_to_string(tickets_file).unwrap();
+    let tickets = get_ticket_data(&text);
+    let text = fs::read_to_string(my_ticket_file).unwrap();
+    let my_tickets = get_ticket_data(&text);
+    let my_ticket = &my_tickets[0];
+    let valid_tickets = get_valid_tickets(&rules, &tickets);
+    let field_names = get_field_names(&rules, &valid_tickets);
+    let fields: Vec<usize> = field_names.iter().enumerate().filter(|(_, e)| {
+            if e.len() >= field_name.len() {
+                &e[..field_name.len()] == field_name
+            } else {
+                false
+            }
+        })
+        .map(|(i, _)| i).collect();
+    fields.iter().fold(1, |acc, e| {
+        acc * my_ticket[*e]
+    })
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_rules, get_ticket_data, get_valid_in_some, count_valid_tickets, get_field_names};
+    use crate::{get_rules, get_ticket_data, get_valid_in_some, count_valid_tickets, get_field_names, multiply_fields};
     use std::fs;
 
     #[test]
@@ -164,5 +201,14 @@ mod tests {
             row.1.clone()
         }).collect();
         assert_eq!(vec!["row", "class", "seat"], get_field_names(&rules, &tickets));
+    }
+
+    #[test]
+    fn test_multiply_fields() {
+        assert_eq!(14, multiply_fields(
+            "data/example_rules.txt",
+            "data/example_nearby_tickets.txt",
+            "data/example_my_ticket.txt",
+            "seat"));
     }
 }
