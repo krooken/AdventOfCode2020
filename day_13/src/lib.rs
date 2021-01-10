@@ -26,9 +26,25 @@ pub fn calculate_product(filename: &str) -> u32 {
     wait * id
 }
 
+fn gcd(a: u64, b: u64) -> u64 {
+    let mut a = a;
+    let mut b = b;
+    if a < b {
+        let tmp_a = a;
+        a = b;
+        b = tmp_a;
+    }
+    while b != 0 {
+        let tmp_b = a % b;
+        a = b;
+        b = tmp_b;
+    }
+    a
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{wait_in_minutes, shortest_wait, calculate_product};
+    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd};
 
     #[test]
     fn test_wait_in_minutes_zero() {
@@ -53,5 +69,15 @@ mod tests {
     #[test]
     fn test_calculate_product() {
         assert_eq!(295, calculate_product("data/example.txt"));
+    }
+
+    #[test]
+    fn test_gcd_1() {
+        assert_eq!(2, gcd(2,4));
+    }
+
+    #[test]
+    fn test_gcd_2() {
+        assert_eq!(1, gcd(5,7));
     }
 }
