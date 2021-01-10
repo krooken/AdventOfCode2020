@@ -42,9 +42,13 @@ fn gcd(a: u64, b: u64) -> u64 {
     a
 }
 
+fn least_common_multiple(a: u64, b: u64) -> u64 {
+    (a/gcd(a,b)) * b
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd};
+    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple};
 
     #[test]
     fn test_wait_in_minutes_zero() {
@@ -79,5 +83,20 @@ mod tests {
     #[test]
     fn test_gcd_2() {
         assert_eq!(1, gcd(5,7));
+    }
+
+    #[test]
+    fn test_lcm_1() {
+        assert_eq!(12, least_common_multiple(3, 4));
+    }
+
+    #[test]
+    fn test_lcm_2() {
+        assert_eq!(15, least_common_multiple(5, 15));
+    }
+
+    #[test]
+    fn test_lcm_3() {
+        assert_eq!(30, least_common_multiple(6, 10));
     }
 }
