@@ -51,7 +51,7 @@ fn find_earliest_for_offset(start: u64, step: (u64, u64), offset: u64) -> u64 {
     let mut b = 0u64;
     while a + offset != b {
         if b < a + offset {
-            b += step.1;
+            b = (((a + offset) / step.1) + if (a + offset) % step.1 == 0 {0} else {1}) * step.1;
         } else {
             a += step.0;
         }
