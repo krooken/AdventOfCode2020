@@ -72,9 +72,23 @@ fn find_earliest_departure(departures: &Vec<(u64, u64)>) -> u64 {
     departure_a
 }
 
+pub fn calculate_earliest_departure(filename: &str) -> u64 {
+    let text = fs::read_to_string(filename).unwrap();
+    let mut rows = text.lines();
+    rows.next().unwrap();
+    let mut timetable: Vec<(u64, u64)> = Vec::new();
+    for (offset, time) in rows.next().unwrap().split(",").enumerate() {
+        match time.parse() {
+            Ok(num) => timetable.push((num, offset as u64)),
+            _ => (),
+        }
+    }
+    find_earliest_departure(&timetable)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple, find_earliest_for_offset, find_earliest_departure};
+    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple, find_earliest_for_offset, find_earliest_departure, calculate_earliest_departure};
 
     #[test]
     fn test_wait_in_minutes_zero() {
@@ -191,5 +205,10 @@ mod tests {
     fn test_find_earliest_departure_7() {
         let v = vec![(1789, 0), (37, 1), (47, 2), (1889, 3)];
         assert_eq!(1_202_161_486, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_calculate_earliest_departure() {
+        assert_eq!(1_068_781, calculate_earliest_departure("data/example.txt"));
     }
 }
