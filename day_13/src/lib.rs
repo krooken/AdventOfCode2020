@@ -62,9 +62,19 @@ fn find_earliest_for_offset(start: u64, step: (u64, u64), offset: u64) -> u64 {
     a
 }
 
+fn find_earliest_departure(departures: &Vec<(u64, u64)>) -> u64 {
+    let mut departure_a = departures[0].0;
+    let mut step = departure_a;
+    for (departure_b, offset_b) in departures.iter().skip(1) {
+        departure_a = find_earliest_for_offset(departure_a, (step, *departure_b), *offset_b);
+        step = least_common_multiple(step, *departure_b);
+    }
+    departure_a
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple, find_earliest_for_offset};
+    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple, find_earliest_for_offset, find_earliest_departure};
 
     #[test]
     fn test_wait_in_minutes_zero() {
@@ -139,5 +149,47 @@ mod tests {
     #[test]
     fn test_find_earliest_for_offset_5() {
         assert_eq!(54, find_earliest_for_offset(9, (15, 7), 2));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_1() {
+        let v = vec![(3, 0), (5, 1), (7, 2)];
+        assert_eq!(54, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_2() {
+        let v = vec![(7, 0), (13, 1), (59, 4), (31, 6), (19, 7)];
+        assert_eq!(1_068_781, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_3() {
+        let v = vec![(17, 0), (13, 2), (19, 3)];
+        assert_eq!(3417, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_4() {
+        let v = vec![(67, 0), (7, 1), (59, 2), (61, 3)];
+        assert_eq!(754_018, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_5() {
+        let v = vec![(67, 0), (7, 2), (59, 3), (61, 4)];
+        assert_eq!(779_210, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_6() {
+        let v = vec![(67, 0), (7, 1), (59, 3), (61, 4)];
+        assert_eq!(1_261_476, find_earliest_departure(&v));
+    }
+
+    #[test]
+    fn test_find_earliest_departure_7() {
+        let v = vec![(1789, 0), (37, 1), (47, 2), (1889, 3)];
+        assert_eq!(1_202_161_486, find_earliest_departure(&v));
     }
 }
