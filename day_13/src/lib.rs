@@ -46,9 +46,25 @@ fn least_common_multiple(a: u64, b: u64) -> u64 {
     (a/gcd(a,b)) * b
 }
 
+fn find_earliest_for_offset(start: u64, step: (u64, u64), offset: u64) -> u64 {
+    let mut a = start;
+    let mut b = 0u64;
+    while a + offset != b {
+        if b < a + offset {
+            b += step.1;
+        } else {
+            a += step.0;
+        }
+    }
+    if a - start > least_common_multiple(step.0, step.1) {
+        panic!();
+    }
+    a
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple};
+    use crate::{wait_in_minutes, shortest_wait, calculate_product, gcd, least_common_multiple, find_earliest_for_offset};
 
     #[test]
     fn test_wait_in_minutes_zero() {
@@ -98,5 +114,30 @@ mod tests {
     #[test]
     fn test_lcm_3() {
         assert_eq!(30, least_common_multiple(6, 10));
+    }
+
+    #[test]
+    fn test_find_earliest_for_offset_1() {
+        assert_eq!(2, find_earliest_for_offset(0, (1, 3), 1));
+    }
+
+    #[test]
+    fn test_find_earliest_for_offset_2() {
+        assert_eq!(1, find_earliest_for_offset(0, (1, 3), 2));
+    }
+
+    #[test]
+    fn test_find_earliest_for_offset_3() {
+        assert_eq!(0, find_earliest_for_offset(0, (1, 3), 3));
+    }
+
+    #[test]
+    fn test_find_earliest_for_offset_4() {
+        assert_eq!(9, find_earliest_for_offset(0, (3, 5), 1));
+    }
+
+    #[test]
+    fn test_find_earliest_for_offset_5() {
+        assert_eq!(54, find_earliest_for_offset(9, (15, 7), 2));
     }
 }
