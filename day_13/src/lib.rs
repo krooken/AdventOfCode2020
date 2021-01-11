@@ -211,4 +211,14 @@ mod tests {
     fn test_calculate_earliest_departure() {
         assert_eq!(1_068_781, calculate_earliest_departure("data/example.txt"));
     }
+
+    #[test]
+    fn test_task1() {
+        assert_eq!(207, calculate_product("data/timetable.txt"));
+    }
+
+    #[test]
+    fn test_task2() {
+        assert_eq!(530_015_546_283_687, calculate_earliest_departure("data/timetable.txt"));
+    }
 }
